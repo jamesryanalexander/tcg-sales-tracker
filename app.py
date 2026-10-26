@@ -77,8 +77,18 @@ def init_db_command() -> None:
 @app.cli.command("hash-password")
 @click.argument("password")
 def hash_password_command(password: str) -> None:
-    """Print a password hash suitable for the AUTH_PASSWORD_HASH env var."""
-    print(generate_password_hash(password))
+    """Print a password hash suitable for the AUTH_PASSWORD_HASH env var.
+
+    Werkzeug's hash format embeds literal '$' characters (method$salt$hash),
+    and Docker Compose treats a bare '$' in a .env file as the start of a
+    variable reference -- pasting the raw hash into .env silently corrupts
+    it (Compose blanks out each "$word" it can't resolve, logged as a
+    'variable is not set' warning at startup, with no error otherwise).
+    So this prints both forms: the raw hash for local dev (flask run),
+    and the '$$'-escaped form Compose needs in .env for Docker deployment."""
+    raw = generate_password_hash(password)
+    print(f"Raw hash (for local dev, config.json, etc.):\n{raw}\n")
+    print(f"For .env (Docker Compose) -- paste this instead:\n{raw.replace('$', '$$')}")
 
 
 @app.cli.command("seed-fixture")

@@ -59,6 +59,9 @@ hand-calculated profit/loss total to sanity-check the dashboard against.
 - `flask --app app init-db` -- create the SQLite schema and seed default expense categories.
 - `flask --app app seed-fixture [path]` -- import a sample (or real) orders CSV.
 - `flask --app app hash-password '<password>'` -- generate a hash for `AUTH_PASSWORD_HASH`.
+  Prints two forms: a raw hash for local dev, and a `$$`-escaped form for `.env` -- use the
+  escaped one for Docker (see the comment in `.env.example` for why; Compose otherwise
+  silently corrupts the hash and warns `variable is not set` with pieces of it as the name).
 
 ## Config
 
@@ -76,7 +79,9 @@ only `expose`s port 5000 internally on the shared `edge` Docker network.
 cp .env.example .env
 # fill in real AUTH_USERNAME/AUTH_PASSWORD_HASH/SECRET_KEY -- strongly recommended here, since
 # this app stores real sales and expense records used for tax filing, not just collectible
-# values like the sibling apps
+# values like the sibling apps. Use the "$$"-escaped hash flask hash-password prints for
+# AUTH_PASSWORD_HASH, not the raw one (see .env.example) -- otherwise Compose will warn
+# "variable is not set" and silently corrupt it, breaking login with no obvious error.
 docker network inspect edge >/dev/null 2>&1 || docker network create edge
 docker compose up -d --build
 ```
