@@ -1,0 +1,14 @@
+{% macro line_item_row(li, is_template=False) %}
+<tr class="line-item-row{% if is_template %} line-item-template{% endif %}" {% if is_template %}hidden{% endif %}>
+  <td><input type="hidden" name="line_item_id" value="{{ li.id if li else '' }}">
+      <input type="text" name="product_name" value="{{ li.product_name if li else '' }}" placeholder="Card name" required></td>
+  <td><input type="text" name="set_name" value="{{ li.set_name if li else '' }}" placeholder="Set"></td>
+  <td><input type="text" name="card_number" value="{{ li.card_number if li else '' }}" placeholder="#"></td>
+  <td><input type="text" name="condition" value="{{ li.condition if li else '' }}" placeholder="NM"></td>
+  <td><input type="number" name="quantity" min="1" value="{{ li.quantity if li else 1 }}"></td>
+  <td><input type="number" step="0.01" name="sale_price_total" value="{{ '%.2f'|format(li.sale_price_total) if li else '' }}" placeholder="0.00"></td>
+  <td><input type="number" step="0.01" name="cogs_total" value="{{ '%.2f'|format(li.cogs_total) if li and li.cogs_total is not none else '' }}" placeholder="0.00"></td>
+  <td><input type="text" name="line_notes" value="{{ li.notes if li else '' }}" placeholder="Notes"></td>
+  <td><button type="button" class="ghost remove-line-item">&times;</button></td>
+</tr>
+{% endmacro %}

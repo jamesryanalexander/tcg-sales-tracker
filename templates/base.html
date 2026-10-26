@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}TCG Sales Tracker{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <div>
+      <h1><a href="{{ url_for('dashboard') }}">TCG Sales Tracker</a></h1>
+      <p>Sales, COGS, fees and expenses for your TCGPlayer selling &mdash; built for tax time.</p>
+    </div>
+    <nav>
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('sales_list') }}">Sales</a>
+      <a href="{{ url_for('expenses_list') }}">Expenses</a>
+      <a href="{{ url_for('import_form') }}">Import</a>
+      <a href="{{ url_for('settings') }}">Settings</a>
+      {% if session.get('site_authed') %}
+        <form method="post" action="{{ url_for('site_logout') }}" class="inline-form">
+          <button type="submit" class="ghost">Log out</button>
+        </form>
+      {% endif %}
+    </nav>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <span>Local Flask app &middot; SQLite database in <code>data/tcg_sales_tracker.sqlite3</code></span>
+    <br>
+    <span>Not tax advice &mdash; verify totals with your accountant before filing.</span>
+  </footer>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

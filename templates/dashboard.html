@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard &middot; TCG Sales Tracker{% endblock %}
+{% block content %}
+
+<section class="card-panel toolbar">
+  <form method="get" class="filters">
+    <label>
+      Year
+      <select name="year" onchange="this.form.submit()">
+        <option value="" {% if not selected_year %}selected{% endif %}>All time</option>
+        {% for y in years %}
+          <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <a class="button" href="{{ url_for('export_summary_csv', year=selected_year) }}">Export P&amp;L summary CSV</a>
+    {% if pnl.lines_needing_review %}
+      <a class="button" href="{{ url_for('sales_list', status='needs_review') }}">
+        {{ pnl.lines_needing_review }} line item(s) need review
+      </a>
+    {% endif %}
+  </form>
+</section>
+
+<section class="stats-row">
+  <div class="stat"><strong>${{ '%.2f'|format(pnl.revenue) }}</strong><span>Revenue</span></div>
+  <div class="stat"><strong>${{ '%.2f'|format(pnl.cogs) }}</strong><span>Cost of Goods Sold</span></div>
+  <div class="stat"><strong>${{ '%.2f'|format(pnl.marketplace_fee) }}</strong><span>Marketplace Fees</span></div>
+  <div class="stat"><strong>${{ '%.2f'|format(pnl.postage) }}</strong><span>Postage</span></div>
+  <div class="stat"><strong>${{ '%.2f'|format(pnl.other_expenses) }}</strong><span>Other Expenses</span></div>
+</section>
+
+<section class="card-panel flag-section">
+  <h2>Net profit {% if selected_year %}for {{ selected_year }}{% else %}(all time){% endif %}</h2>
+  <p class="net-profit {{ 'positive' if pnl.net_profit >= 0 else 'negative' }}">
+    ${{ '%.2f'|format(pnl.net_profit) }}
+  </p>
+  <p class="mono">{{ pnl.order_count }} order(s) in this view.</p>
+</section>
+
+<section class="card-panel">
+  <h2>Recent sales</h2>
+  {% if recent_orders %}
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Order #</th><th>Shipping charged</th><th>Fee</th><th>Postage</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for o in recent_orders %}
+        <tr>
+          <td class="mono">{{ o.order_date }}</td>
+          <td>{{ o.order_number or '—' }}</td>
+          <td>{{ '$%.2f'|format(o.shipping_charged) if o.shipping_charged is not none else '—' }}</td>
+          <td>{{ '$%.2f'|format(o.marketplace_fee) if o.marketplace_fee is not none else '—' }}</td>
+          <td>{{ '$%.2f'|format(o.postage_cost) if o.postage_cost is not none else '—' }}</td>
+          <td><span class="badge badge-{{ o.status }}">{{ o.status }}</span></td>
+          <td><a href="{{ url_for('sale_edit_form', order_id=o.id) }}">Edit</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">No sales yet. <a href="{{ url_for('import_form') }}">Import a TCGPlayer orders CSV</a>
+    or <a href="{{ url_for('sale_new_form') }}">add one manually</a>.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

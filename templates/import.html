@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Import &middot; TCG Sales Tracker{% endblock %}
+{% block content %}
+
+<section class="card-panel">
+  <h2>Import a TCGPlayer orders CSV</h2>
+  <p>From your <a href="https://seller.tcgplayer.com/" target="_blank" rel="noopener">TCGPlayer Seller Portal</a>,
+    go to Orders, select the orders you want, and use <strong>Export Shipping</strong> to download a CSV. Upload
+    it here.</p>
+  <p>Column names vary by export; whatever this importer can't find (most commonly per-order
+    marketplace fees) is left blank and the order is flagged <strong>needs review</strong> so you
+    can fill it in by hand afterward. Re-uploading the same export is safe &mdash; orders are
+    matched by order number and never duplicated.</p>
+  <form method="post" enctype="multipart/form-data" class="stacked">
+    <label>
+      Orders CSV file
+      <input type="file" name="orders_file" accept=".csv,text/csv" required>
+    </label>
+    <button type="submit">Import</button>
+  </form>
+</section>
+
+<section class="card-panel">
+  <h2>Recent imports</h2>
+  {% if import_logs %}
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>When</th><th>Type</th><th>File</th><th>Rows seen</th><th>Created</th>
+          <th>Duplicates skipped</th><th>Needs review</th><th>Message</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in import_logs %}
+        <tr>
+          <td class="mono">{{ log.created_at }}</td>
+          <td>{{ log.import_type }}</td>
+          <td class="path-cell">{{ log.filename }}</td>
+          <td>{{ log.rows_seen }}</td>
+          <td>{{ log.orders_created }}</td>
+          <td>{{ log.orders_skipped_duplicate }}</td>
+          <td>{{ log.rows_needing_review }}</td>
+          <td class="mono">{{ log.message }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="mono">No imports yet.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

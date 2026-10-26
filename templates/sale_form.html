@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% from '_line_item_rows.html' import line_item_row %}
+{% block title %}{{ 'Edit sale' if order else 'New sale' }} &middot; TCG Sales Tracker{% endblock %}
+{% block content %}
+
+<section class="card-panel">
+  <h2>{{ 'Edit sale' if order else 'New sale' }}</h2>
+  {% if order and order.status == 'needs_review' %}
+    <p class="flash warning">This order was imported without a complete fee/postage/shipping
+      breakdown. Fill in what's missing below, split the placeholder line item into real cards
+      with COGS, then save.</p>
+  {% endif %}
+
+  <form method="post" class="stacked">
+    <div class="order-fields">
+      <label>
+        Order date
+        <input type="date" name="order_date" value="{{ order.order_date if order else '' }}" required>
+      </label>
+      <label>
+        Order number
+        <input type="text" name="order_number" value="{{ order.order_number if order else '' }}" placeholder="(optional)">
+      </label>
+      <label>
+        Buyer location
+        <input type="text" name="buyer_location" value="{{ order.buyer_location if order else '' }}">
+      </label>
+      <label>
+        Tracking number
+        <input type="text" name="tracking_number" value="{{ order.tracking_number if order else '' }}">
+      </label>
+      <label>
+        Shipping charged to buyer ($)
+        <input type="number" step="0.01" name="shipping_charged" value="{{ '%.2f'|format(order.shipping_charged) if order and order.shipping_charged is not none else '' }}">
+      </label>
+      <label>
+        Marketplace fee ($)
+        <input type="number" step="0.01" name="marketplace_fee" value="{{ '%.2f'|format(order.marketplace_fee) if order and order.marketplace_fee is not none else '' }}">
+      </label>
+      <label>
+        Postage cost ($)
+        <input type="number" step="0.01" name="postage_cost" value="{{ '%.2f'|format(order.postage_cost) if order and order.postage_cost is not none else '' }}">
+      </label>
+      <label>
+        Other fees ($)
+        <input type="number" step="0.01" name="other_fees" value="{{ '%.2f'|format(order.other_fees) if order and order.other_fees is not none else '' }}">
+      </label>
+      <label>
+        Product weight (oz)
+        <input type="number" step="0.01" name="product_weight_oz" value="{{ '%.2f'|format(order.product_weight_oz) if order and order.product_weight_oz is not none else '' }}">
+      </label>
+    </div>
+    <label>
+      Notes
+      <input type="text" name="notes" value="{{ order.notes if order else '' }}">
+    </label>
+
+    <h3>Line items</h3>
+    <div class="table-scroll">
+      <table id="line-items-table">
+        <thead>
+          <tr>
+            <th>Card</th><th>Set</th><th>#</th><th>Cond.</th><th>Qty</th>
+            <th>Sale price</th><th>COGS</th><th>Notes</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for li in line_items %}
+            {{ line_item_row(li) }}
+          {% endfor %}
+          {{ line_item_row(None, is_template=True) }}
+        </tbody>
+      </table>
+    </div>
+    <button type="button" id="add-line-item" class="ghost">+ Add line item</button>
+
+    <div class="settings-actions">
+      <button type="submit">Save sale</button>
+    </div>
+  </form>
+
+  {% if order %}
+  <form method="post" action="{{ url_for('sale_delete', order_id=order.id) }}" class="settings-actions"
+        onsubmit="return confirm('Delete this sale and its line items?');">
+    <button type="submit" class="danger">Delete sale</button>
+  </form>
+  {% endif %}
+</section>
+
+{% endblock %}

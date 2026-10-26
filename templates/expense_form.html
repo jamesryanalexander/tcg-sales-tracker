@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit expense' if expense else 'New expense' }} &middot; TCG Sales Tracker{% endblock %}
+{% block content %}
+
+<section class="card-panel">
+  <h2>{{ 'Edit expense' if expense else 'New expense' }}</h2>
+  <form method="post" enctype="multipart/form-data" class="stacked">
+    <div class="order-fields">
+      <label>
+        Date
+        <input type="date" name="expense_date" value="{{ expense.expense_date if expense else '' }}" required>
+      </label>
+      <label>
+        Amount ($)
+        <input type="number" step="0.01" name="amount" value="{{ '%.2f'|format(expense.amount) if expense else '' }}" required>
+      </label>
+      <label>
+        Category
+        <select name="category_id" required>
+          {% for c in categories %}
+            <option value="{{ c.id }}" {% if expense and expense.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Vendor
+        <input type="text" name="vendor" value="{{ expense.vendor if expense else '' }}">
+      </label>
+    </div>
+    <label>
+      Description
+      <input type="text" name="description" value="{{ expense.description if expense else '' }}" required>
+    </label>
+    <label>
+      Receipt note
+      <input type="text" name="receipt_note" value="{{ expense.receipt_note if expense else '' }}" placeholder="e.g. Amazon order #...">
+    </label>
+    <label>
+      Receipt file (optional)
+      <input type="file" name="receipt_file">
+    </label>
+    {% if expense and expense.receipt_file %}
+      <p class="mono">Current receipt: {{ expense.receipt_file }}</p>
+    {% endif %}
+    <div class="settings-actions">
+      <button type="submit">Save expense</button>
+    </div>
+  </form>
+
+  {% if expense %}
+  <form method="post" action="{{ url_for('expense_delete', expense_id=expense.id) }}" class="settings-actions"
+        onsubmit="return confirm('Delete this expense?');">
+    <button type="submit" class="danger">Delete expense</button>
+  </form>
+  {% endif %}
+</section>
+
+{% endblock %}
