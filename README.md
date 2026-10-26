@@ -1,7 +1,8 @@
 > **Disclosure:** This is a personal app for tracking my own TCGPlayer card sales for tax
 > record-keeping. It was built with the help of Claude Code; all AI-generated components have
-> been manually reviewed and tested to ensure stability and security. **This app does not
-> provide tax advice** -- verify totals with your accountant before filing.
+> been manually reviewed and tested to ensure stability and security. All human created and
+> guided code is released under a Creative Commons CC-0 Dedication to the extent necessary.
+> **This app does not provide tax advice** -- verify totals with your accountant before filing.
 
 # TCG Sales Tracker
 
