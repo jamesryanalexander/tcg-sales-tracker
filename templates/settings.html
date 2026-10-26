@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Settings &middot; TCG Sales Tracker{% endblock %}
+{% block content %}
+
+<div class="settings-grid">
+  <section class="card-panel">
+    <h2>Expense categories</h2>
+    <p>Used to tag general expenses (supplies, postage, subscriptions, etc.) for the P&amp;L
+      report. <code>Marketplace Fees</code> and <code>Postage</code> are special: expenses
+      tagged with those names are added to the per-order fee/postage totals on the dashboard,
+      rather than counted separately.</p>
+    <table>
+      <thead><tr><th>Name</th><th></th></tr></thead>
+      <tbody>
+        {% for c in categories %}
+        <tr>
+          <td>{{ c.name }}{% if c.is_archived %} <span class="mono">(archived)</span>{% endif %}</td>
+          <td>
+            {% if c.is_archived %}
+            <form method="post" action="{{ url_for('unarchive_category', category_id=c.id) }}" class="inline-form">
+              <button type="submit" class="ghost">Restore</button>
+            </form>
+            {% else %}
+            <form method="post" action="{{ url_for('archive_category', category_id=c.id) }}" class="inline-form">
+              <button type="submit" class="ghost">Archive</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <form method="post" class="stacked">
+      <label>
+        New category name
+        <input type="text" name="category_name" placeholder="e.g. Storage Boxes" required>
+      </label>
+      <button type="submit">Add category</button>
+    </form>
+    <p>Site login gate: {{ 'enabled' if auth_enabled else 'disabled (local dev default)' }}</p>
+  </section>
+
+  <section class="card-panel">
+    <h2>Recent imports</h2>
+    {% if import_logs %}
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>When</th><th>File</th><th>Created</th><th>Dupes</th><th>Review</th></tr>
+        </thead>
+        <tbody>
+          {% for log in import_logs %}
+          <tr>
+            <td class="mono">{{ log.created_at }}</td>
+            <td class="path-cell">{{ log.filename }}</td>
+            <td>{{ log.orders_created }}</td>
+            <td>{{ log.orders_skipped_duplicate }}</td>
+            <td>{{ log.rows_needing_review }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="mono">No imports yet.</p>
+    {% endif %}
+  </section>
+</div>
+
+{% endblock %}

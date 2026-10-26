@@ -1,0 +1,18 @@
+services:
+  app:
+    build: .
+    container_name: tcg-sales-tracker-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    expose:
+      - "5000"
+    networks:
+      - edge
+
+networks:
+  edge:
+    name: edge
+    external: true

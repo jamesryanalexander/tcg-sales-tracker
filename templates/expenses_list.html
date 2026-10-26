@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Expenses &middot; TCG Sales Tracker{% endblock %}
+{% block content %}
+
+<section class="card-panel toolbar">
+  <form method="get" class="filters">
+    <label>
+      Year
+      <select name="year" onchange="this.form.submit()">
+        <option value="" {% if not selected_year %}selected{% endif %}>All</option>
+        {% for y in years %}
+          <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Category
+      <select name="category_id" onchange="this.form.submit()">
+        <option value="">All</option>
+        {% for c in categories %}
+          <option value="{{ c.id }}" {% if category_id == c.id|string %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <a class="button" href="{{ url_for('expense_new_form') }}">+ Add expense</a>
+    <a class="button" href="{{ url_for('export_expenses_csv', year=selected_year) }}">Export CSV</a>
+  </form>
+</section>
+
+<section class="stats-row">
+  {% for row in breakdown %}
+    <div class="stat"><strong>${{ '%.2f'|format(row.total) }}</strong><span>{{ row.name }} ({{ row.count }})</span></div>
+  {% endfor %}
+</section>
+
+<section class="card-panel">
+  {% if expenses %}
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Category</th><th>Amount</th><th>Description</th><th>Vendor</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for e in expenses %}
+        <tr>
+          <td class="mono">{{ e.expense_date }}</td>
+          <td>{{ e.category_name }}</td>
+          <td>${{ '%.2f'|format(e.amount) }}</td>
+          <td>{{ e.description }}</td>
+          <td>{{ e.vendor or '—' }}</td>
+          <td><a href="{{ url_for('expense_edit_form', expense_id=e.id) }}">Edit</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">No expenses logged yet.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Sales &middot; TCG Sales Tracker{% endblock %}
+{% block content %}
+
+<section class="card-panel toolbar">
+  <form method="get" class="filters">
+    <label>
+      Search
+      <input type="search" name="q" value="{{ q }}" placeholder="Order # or card name">
+    </label>
+    <label>
+      Year
+      <select name="year">
+        <option value="" {% if not selected_year %}selected{% endif %}>All</option>
+        {% for y in years %}
+          <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Status
+      <select name="status">
+        <option value="" {% if not status %}selected{% endif %}>Any</option>
+        <option value="needs_review" {% if status == 'needs_review' %}selected{% endif %}>Needs review</option>
+        <option value="manual" {% if status == 'manual' %}selected{% endif %}>Manual</option>
+        <option value="reviewed" {% if status == 'reviewed' %}selected{% endif %}>Reviewed</option>
+      </select>
+    </label>
+    <button type="submit">Filter</button>
+    <a class="button" href="{{ url_for('sale_new_form') }}">+ Add sale</a>
+  </form>
+</section>
+
+<section class="card-panel">
+  {% if orders %}
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Order #</th><th>Shipping charged</th><th>Fee</th><th>Postage</th>
+          <th>Status</th><th>Source</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td class="mono">{{ o.order_date }}</td>
+          <td>{{ o.order_number or '—' }}</td>
+          <td>{{ '$%.2f'|format(o.shipping_charged) if o.shipping_charged is not none else '—' }}</td>
+          <td>{{ '$%.2f'|format(o.marketplace_fee) if o.marketplace_fee is not none else '—' }}</td>
+          <td>{{ '$%.2f'|format(o.postage_cost) if o.postage_cost is not none else '—' }}</td>
+          <td><span class="badge badge-{{ o.status }}">{{ o.status.replace('_', ' ') }}</span></td>
+          <td>{{ o.source }}</td>
+          <td class="row-actions">
+            <a href="{{ url_for('sale_edit_form', order_id=o.id) }}">Edit</a>
+            {% if o.status != 'reviewed' %}
+            <form method="post" action="{{ url_for('sale_mark_reviewed', order_id=o.id) }}" class="inline-form">
+              <button type="submit" class="ghost">Mark reviewed</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">No sales match these filters.</p>
+  {% endif %}
+</section>
+
+{% endblock %}
